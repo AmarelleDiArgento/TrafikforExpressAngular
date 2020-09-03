@@ -1,0 +1,57 @@
+version: "3"
+
+services:
+
+  reverse-proxy:
+    # The official v2 Traefik docker image
+    image: traefik:v2.2
+    # Enables the web UI and tells Traefik to listen to docker
+    command: --api.insecure=true --providers.docker
+    ports:
+      # The HTTP port
+      - "80:80"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  front:
+    image: nginx
+    labels:
+      - "traefik.http.routers.front.rule=Host:thegraph.eliteflower.co"
+    restart: always
+    volumes:
+      - /usr/share/zoneinfo/America/Bogota:/etc/localtime
+      - ./front/dist/SQLfrontQuality/:/usr/share/nginx/html/
+      - ./nginx/:/etc/nginx/
+    expose:
+      - "3000"
+
+  back:
+    image: node
+    labels:
+      - "traefik.http.routers.front.rule=Host:thegraphdata.eliteflower.co"
+    restart: always
+    working_dir: /home/node/thegraph
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./back/:/home/node/thegraph
+    expose:
+      - "80"
+
+    command: "npm start"
+
+  mssql:
+    image: microsoft/mssql-server-linux:latest
+    labels:
+      - "traefik.http.routers.mssql.rule=Host:thegraphdb.eliteflower.co"
+    volumes:
+      - ./mssql/data:/var/opt/mssql/data
+    restart: always
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=4dm1nPr0c
+    expose:
+      - "1433"

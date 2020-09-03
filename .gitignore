@@ -1,0 +1,4 @@
+back
+front
+mssql/data/*.ldf
+mssql/data/*.mdf
