@@ -4,39 +4,31 @@ services:
   proxy:
     # The official v2 Traefik docker image
     image: traefik:v2.1
-    # Enables the web UI and tells Traefik to listen to docker
-
-    command: --providers.docker --api.insecure=true
-    # command:  --api.insecure=true --providers.docker
-    #           --logLevel=info \
-    #           --acme \
-    #           --acme.acmelogging \
-    #           --acme.dnschallenge=false
-    #           --acme.entrypoint="https" \
-    #           --acme.httpchallenge \
-    #           --acme.httpChallenge.entryPoint="http" \
-    #           --acme.onhostrule=true \
-    #           --acme.storage="/etc/traefik/acme.json"
-    #           --acme.email="almoreno@eliteflower.com"
-    #           --entrypoints="Name:http Address::80 Redirect.EntryPoint:https" \
-    #           --entrypoints="Name:https Address::443 TLS" \
-    #           --defaultentrypoints="http:https"
+    container_name: proxy
 
     ports:
       # The HTTP port
       - "80:80"
+      # The secure HTTPS port
       - "443:443"
       # The Web UI (enabled by --api.insecure=true)
       - "8080:8080"
     volumes:
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik.yml:/traefik.yml
+      - ./traefik.log:/traefik.log
+      # documento para generar certificados
+      #- ./acme.json:/acme.json
 
   front:
     image: nginx
     container_name: front
     labels:
       - "traefik.http.routers.front.rule=Host(`thegraph.eliteflower.co`)"
+    # habilitar lineas para activar ssl
+    #  - "traefik.http.routers.front.entrypoints=websecure"
+    #  - "traefik.http.routers.front.tls.certresolver=resolver"
     restart: always
     volumes:
       - /usr/share/zoneinfo/America/Bogota:/etc/localtime
@@ -49,6 +41,9 @@ services:
     labels:
       - "traefik.http.routers.back.rule=Host(`thegraphdata.eliteflower.co`)"
       - "traefik.http.services.back.loadbalancer.server.port=3000"
+      # habilitar lineas para activar ssl
+      #  - "traefik.http.routers.back.entrypoints=websecure"
+      #  - "traefik.http.routers.back.tls.certresolver=resolver"
     restart: always
     working_dir: /home/node/thegraph
     environment:
