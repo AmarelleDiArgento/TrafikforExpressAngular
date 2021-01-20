@@ -2,18 +2,18 @@ api:
   insecure: true
 
 # habilidar lines para generar certificado ssl (Requiere dominio)
-# entryPoints:
-#   web:
-#     address: ":80"
-#   websecure:
-#     address: ":443"
-# certificatesResolvers:
-#   resolver:
-#     acme:
-#       email: almoreno@eliteflower.com
-#       storage: /acme.json
-#       httpChallenge:
-#         entryPoint: web
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+certificatesResolvers:
+  resolver:
+    acme:
+      email: data@reportshcg.com
+      storage: /acme.json
+      httpChallenge:
+        entryPoint: web
 
 providers:
   docker:

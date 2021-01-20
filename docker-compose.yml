@@ -19,16 +19,16 @@ services:
       - ./traefik.yml:/traefik.yml
       - ./traefik.log:/traefik.log
       # documento para generar certificados
-      #- ./acme.json:/acme.json
+      - ./acme.json:/acme.json
 
   front:
     image: nginx
     container_name: front
     labels:
-      - "traefik.http.routers.front.rule=Host(`thegraph.eliteflower.co`)"
+      - "traefik.http.routers.front.rule=Host(`reportshcg.com`)"
     # habilitar lineas para activar ssl
-    #  - "traefik.http.routers.front.entrypoints=websecure"
-    #  - "traefik.http.routers.front.tls.certresolver=resolver"
+      - "traefik.http.routers.front.entrypoints=websecure"
+      - "traefik.http.routers.front.tls.certresolver=resolver"
     restart: always
     volumes:
       - /usr/share/zoneinfo/America/Bogota:/etc/localtime
@@ -39,11 +39,11 @@ services:
     image: node
     container_name: back
     labels:
-      - "traefik.http.routers.back.rule=Host(`thegraphdata.eliteflower.co`)"
+      - "traefik.http.routers.back.rule=Host(`data.back.reportshcg.com`)"
       - "traefik.http.services.back.loadbalancer.server.port=3000"
       # habilitar lineas para activar ssl
-      #  - "traefik.http.routers.back.entrypoints=websecure"
-      #  - "traefik.http.routers.back.tls.certresolver=resolver"
+      - "traefik.http.routers.back.entrypoints=websecure"
+      - "traefik.http.routers.back.tls.certresolver=resolver"
     restart: always
     working_dir: /home/node/thegraph
     environment:
@@ -58,7 +58,7 @@ services:
     container_name: mssql
     labels:
       - traefik.enable=true
-      - traefik.tcp.routers.mssql.rule=HostSNI(`thegraphdb.eliteflower.co`)
+      - traefik.tcp.routers.mssql.rule=HostSNI(`db.reportshcg.com`)
       - traefik.tcp.routers.mssql.tls=true
       - traefik.tcp.routers.mssql.service=mssql
       - traefik.tcp.services.mssql.loadbalancer.server.port=1433
